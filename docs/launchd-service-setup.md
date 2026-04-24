@@ -79,9 +79,15 @@ launchctl load -w ~/Library/LaunchAgents/com.goclaw.gateway.plist
 Binary không hot-reload → sau khi rebuild phải restart service:
 
 ```bash
-go build -o goclaw .
+# Backend + embedded Web UI (recommended)
+make build-full
 launchctl kickstart -k gui/$(id -u)/com.goclaw.gateway
+
+# Backend only, KHÔNG có UI (GET / → 404)
+go build -o goclaw .
 ```
+
+**Chú ý:** `go build -o goclaw .` (không tag) sẽ **không embed** `ui/web/dist` → truy cập `/` trả 404. Luôn dùng `make build-full` nếu muốn truy cập Web UI tại `http://localhost:18790`.
 
 ## Troubleshooting
 
