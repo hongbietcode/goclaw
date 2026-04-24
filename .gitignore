@@ -97,3 +97,5 @@ skills/finance-kit
 
 delegate/
 goclaw.log
+# Local launchd service (contains secrets)
+com.goclaw.gateway.plist
