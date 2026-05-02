@@ -13,7 +13,7 @@
  * KEEP IN SYNC with ui/desktop/frontend/src/data/tts-providers.ts
  */
 
-export type TtsProviderId = "openai" | "elevenlabs" | "edge" | "minimax" | "gemini";
+export type TtsProviderId = "openai" | "elevenlabs" | "edge" | "minimax" | "gemini" | "soniox";
 
 /** Minimal display info only — no runtime data. */
 export interface TtsProviderMeta {
@@ -53,6 +53,12 @@ export const TTS_PROVIDERS: Record<TtsProviderId, TtsProviderMeta> = {
     title: "Google Gemini",
     color: "#1a73e8",
     desc: "Gemini 3.1 Flash TTS — 70+ languages, multi-speaker, audio tags (preview)",
+  },
+  soniox: {
+    id: "soniox",
+    title: "Soniox",
+    color: "#ff6b35",
+    desc: "Soniox TTS — real-time neural voices with matching STT transcription",
   },
 };
 
@@ -99,5 +105,8 @@ export const PROVIDER_MODEL_CATALOG: Record<TtsProviderId, TtsModelOption[]> = {
     { value: "gemini-3.1-flash-tts-preview", label: "Gemini 3.1 Flash TTS (preview)" },
     { value: "gemini-2.5-flash-preview-tts", label: "Gemini 2.5 Flash TTS (preview)" },
     { value: "gemini-2.5-pro-preview-tts", label: "Gemini 2.5 Pro TTS (preview)" },
+  ],
+  soniox: [
+    { value: "tts-rt-v1", label: "TTS RT v1" },
   ],
 };

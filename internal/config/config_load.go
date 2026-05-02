@@ -127,6 +127,7 @@ func (c *Config) applyEnvOverrides() {
 	envStr("GOCLAW_TTS_ELEVENLABS_API_KEY", &c.Tts.ElevenLabs.APIKey)
 	envStr("GOCLAW_TTS_MINIMAX_API_KEY", &c.Tts.MiniMax.APIKey)
 	envStr("GOCLAW_TTS_MINIMAX_GROUP_ID", &c.Tts.MiniMax.GroupID)
+	envStr("GOCLAW_TTS_SONIOX_API_KEY", &c.Tts.Soniox.APIKey)
 
 	// Auto-enable channels if credentials are provided via env
 	if c.Channels.Telegram.Token != "" {

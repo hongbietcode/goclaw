@@ -25,7 +25,8 @@
     "elevenlabs": "ElevenLabs",
     "edge": "Edge (Free)",
     "minimax": "MiniMax",
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "soniox": "Soniox"
   },
   "autoModes": {
     "off": "Off",
@@ -169,8 +170,7 @@
       }
     }
   },
-  "gemini": {
-    "apiKey": "API Key",
+  "gemini": {    "apiKey": "API Key",
     "apiBase": "API Base URL",
     "voice": "Voice",
     "model": "Model",
@@ -208,6 +208,9 @@
       "insertHint": "Click a tag to insert at caret"
     },
     "previewBadge": "Preview"
+  },
+  "soniox": {
+    "apiKey": "API Key"
   },
   "voice_label": "Voice",
   "voice_placeholder": "Select a voice…",

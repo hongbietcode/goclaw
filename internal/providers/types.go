@@ -65,6 +65,12 @@ type Provider interface {
 	Name() string
 }
 
+// WorkDirer is optionally implemented by providers that have a configured working directory.
+// When set, the agent's workspace automatically follows the provider's work_dir.
+type WorkDirer interface {
+	WorkDir() string
+}
+
 // ThinkingCapable is optionally implemented by providers that support extended thinking.
 // Used to gate thinking_level injection so it's not sent to providers that ignore it.
 type ThinkingCapable interface {

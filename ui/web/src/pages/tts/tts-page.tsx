@@ -56,7 +56,7 @@ function getModelId(draft: TtsConfig): string {
   }
 }
 
-type ProviderKey = keyof Pick<TtsConfig, "openai" | "elevenlabs" | "edge" | "minimax" | "gemini">;
+type ProviderKey = keyof Pick<TtsConfig, "openai" | "elevenlabs" | "edge" | "minimax" | "gemini" | "soniox">;
 
 function voicePatch(provider: string, value: string): [ProviderKey, Partial<TtsProviderConfig>] | null {
   switch (provider) {

@@ -7,6 +7,7 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/audio/elevenlabs"
 	geminiaudio "github.com/nextlevelbuilder/goclaw/internal/audio/gemini"
 	minimaxaudio "github.com/nextlevelbuilder/goclaw/internal/audio/minimax"
+	"github.com/nextlevelbuilder/goclaw/internal/audio/soniox"
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/config"
 	"github.com/nextlevelbuilder/goclaw/internal/memory"
@@ -362,7 +363,23 @@ func setupAudioExtras(cfg *config.Config, mgr *tts.Manager) {
 			APIKey:  ellKey,
 			BaseURL: ellBase,
 		}))
-		mgr.SetSTTChain([]string{"elevenlabs", "proxy"})
 		slog.Info("audio.stt: elevenlabs registered")
+	}
+
+	// Soniox STT — registered when API key is present; takes priority over ElevenLabs.
+	sonioxKey := cfg.Tts.Soniox.APIKey
+	if sonioxKey != "" {
+		mgr.RegisterSTT(soniox.NewSTTProvider(sonioxKey, cfg.Tts.TimeoutMs))
+		slog.Info("audio.stt: soniox registered")
+	}
+
+	// Build STT chain: soniox first (if available), then elevenlabs, then proxy fallback.
+	switch {
+	case sonioxKey != "" && ellKey != "":
+		mgr.SetSTTChain([]string{"soniox", "elevenlabs", "proxy"})
+	case sonioxKey != "":
+		mgr.SetSTTChain([]string{"soniox", "proxy"})
+	case ellKey != "":
+		mgr.SetSTTChain([]string{"elevenlabs", "proxy"})
 	}
 }

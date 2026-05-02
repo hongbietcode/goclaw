@@ -35,6 +35,7 @@ type ACPProvider struct {
 
 	done      chan struct{}
 	closeOnce sync.Once
+	workDir   string
 }
 
 // ACPOption configures an ACPProvider.
@@ -92,6 +93,7 @@ func NewACPProvider(binary string, args []string, workDir string, idleTTL time.D
 	if p.permMode != "" {
 		bridgeOpts = append(bridgeOpts, acp.WithPermMode(p.permMode))
 	}
+	p.workDir = workDir
 	p.bridge = acp.NewToolBridge(workDir, bridgeOpts...)
 
 	p.pool = acp.NewProcessPool(binary, args, workDir, idleTTL)
@@ -168,6 +170,7 @@ func (p *ACPProvider) resolveSession(ctx context.Context, proc *acp.ACPProcess, 
 
 func (p *ACPProvider) Name() string         { return p.name }
 func (p *ACPProvider) DefaultModel() string { return p.defaultModel }
+func (p *ACPProvider) WorkDir() string      { return p.workDir }
 
 // Capabilities implements CapabilitiesAware for pipeline code-path selection.
 func (p *ACPProvider) Capabilities() ProviderCapabilities {

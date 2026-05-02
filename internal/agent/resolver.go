@@ -268,7 +268,11 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 
 		// Expand ~ in workspace path and ensure directory exists.
 		// For non-master tenants, prefix workspace with tenant slug directory.
+		// If provider has a configured work_dir, it takes priority.
 		workspace := ag.Workspace
+		if wd, ok := provider.(providers.WorkDirer); ok && wd.WorkDir() != "" {
+			workspace = wd.WorkDir()
+		}
 		if workspace != "" {
 			workspace = config.ExpandHome(workspace)
 			if !filepath.IsAbs(workspace) {

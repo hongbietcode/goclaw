@@ -25,7 +25,8 @@
     "elevenlabs": "ElevenLabs",
     "edge": "Edge (Miễn phí)",
     "minimax": "MiniMax",
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "soniox": "Soniox"
   },
   "autoModes": {
     "off": "Tắt",
@@ -208,6 +209,9 @@
       "insertHint": "Nhấp vào thẻ để chèn tại vị trí con trỏ"
     },
     "previewBadge": "Xem trước"
+  },
+  "soniox": {
+    "apiKey": "API Key"
   },
   "voice_label": "Giọng đọc",
   "voice_placeholder": "Chọn giọng đọc…",

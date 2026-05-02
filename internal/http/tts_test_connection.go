@@ -17,6 +17,7 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/audio/gemini"
 	"github.com/nextlevelbuilder/goclaw/internal/audio/minimax"
 	"github.com/nextlevelbuilder/goclaw/internal/audio/openai"
+	"github.com/nextlevelbuilder/goclaw/internal/audio/soniox"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
 )
@@ -50,6 +51,7 @@ var supportedTestProviders = map[string]bool{
 	"edge":       true,
 	"minimax":    true,
 	"gemini":     true,
+	"soniox":     true,
 }
 
 // providersRequiringAPIKey lists providers that need an API key.
@@ -58,6 +60,7 @@ var providersRequiringAPIKey = map[string]bool{
 	"elevenlabs": true,
 	"minimax":    true,
 	"gemini":     true,
+	"soniox":     true,
 }
 
 const defaultTestConnectionTimeoutMs = 120000 // 120s default; req.TimeoutMs > tenant > default
@@ -233,6 +236,14 @@ func createEphemeralTTSProvider(req testConnectionRequest) (audio.TTSProvider, e
 		}), nil
 	case "gemini":
 		return gemini.NewProvider(gemini.Config{
+			APIKey:    req.APIKey,
+			APIBase:   req.APIBase,
+			Voice:     req.VoiceID,
+			Model:     req.ModelID,
+			TimeoutMs: req.TimeoutMs,
+		}), nil
+	case "soniox":
+		return soniox.NewProvider(soniox.Config{
 			APIKey:    req.APIKey,
 			APIBase:   req.APIBase,
 			Voice:     req.VoiceID,

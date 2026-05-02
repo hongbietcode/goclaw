@@ -47,6 +47,7 @@ type ttsConfigResponse struct {
 	Edge       ttsProviderConfigResponse `json:"edge"`
 	MiniMax    ttsProviderConfigResponse `json:"minimax"`
 	Gemini     ttsProviderConfigResponse `json:"gemini"`
+	Soniox     ttsProviderConfigResponse `json:"soniox"`
 }
 
 type ttsProviderConfigResponse struct {
@@ -159,6 +160,16 @@ func (h *TTSConfigHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 		if v, _ := h.systemConfigs.Get(ctx, "tts.gemini.speakers"); v != "" {
 			resp.Gemini.Speakers = v
 		}
+		// Soniox
+		if v, _ := h.systemConfigs.Get(ctx, "tts.soniox.api_base"); v != "" {
+			resp.Soniox.APIBase = v
+		}
+		if v, _ := h.systemConfigs.Get(ctx, "tts.soniox.voice"); v != "" {
+			resp.Soniox.Voice = v
+		}
+		if v, _ := h.systemConfigs.Get(ctx, "tts.soniox.model"); v != "" {
+			resp.Soniox.Model = v
+		}
 		// Params blobs (dual-read: legacy flat keys already loaded above; return blob as-is for UI)
 		if v, _ := h.systemConfigs.Get(ctx, "tts.openai.params"); v != "" {
 			_ = json.Unmarshal([]byte(v), &resp.OpenAI.Params)
@@ -174,6 +185,9 @@ func (h *TTSConfigHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 		}
 		if v, _ := h.systemConfigs.Get(ctx, "tts.gemini.params"); v != "" {
 			_ = json.Unmarshal([]byte(v), &resp.Gemini.Params)
+		}
+		if v, _ := h.systemConfigs.Get(ctx, "tts.soniox.params"); v != "" {
+			_ = json.Unmarshal([]byte(v), &resp.Soniox.Params)
 		}
 	}
 
@@ -194,6 +208,9 @@ func (h *TTSConfigHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 		if v, _ := h.configSecrets.Get(ctx, "tts.gemini.api_key"); v != "" {
 			resp.Gemini.APIKey = "***"
 		}
+		if v, _ := h.configSecrets.Get(ctx, "tts.soniox.api_key"); v != "" {
+			resp.Soniox.APIKey = "***"
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -212,6 +229,7 @@ type ttsConfigSaveRequest struct {
 	Edge       *ttsProviderSaveRequest `json:"edge,omitempty"`
 	MiniMax    *ttsProviderSaveRequest `json:"minimax,omitempty"`
 	Gemini     *ttsProviderSaveRequest `json:"gemini,omitempty"`
+	Soniox     *ttsProviderSaveRequest `json:"soniox,omitempty"`
 }
 
 type ttsProviderSaveRequest struct {
@@ -326,6 +344,17 @@ func (h *TTSConfigHandler) handleSave(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		if req.Soniox != nil {
+			if v := req.Soniox.resolvedAPIBase(); v != "" && !set("tts.soniox.api_base", v, "soniox api_base") {
+				return
+			}
+			if v := req.Soniox.resolvedVoice(); v != "" && !set("tts.soniox.voice", v, "soniox voice") {
+				return
+			}
+			if v := req.Soniox.resolvedModel(); v != "" && !set("tts.soniox.model", v, "soniox model") {
+				return
+			}
+		}
 		// Dual-write: validate then save params blobs alongside legacy flat keys.
 		// Finding #3: ValidateParams enforces Min/Max/Enum + rejects unknown keys.
 		if req.OpenAI != nil && req.OpenAI.Params != nil {
@@ -350,6 +379,11 @@ func (h *TTSConfigHandler) handleSave(w http.ResponseWriter, r *http.Request) {
 		}
 		if req.Gemini != nil && req.Gemini.Params != nil {
 			if !validateAndSaveParamsBlob(w, ctx, h.systemConfigs.Set, "tts.gemini.params", "gemini", req.Gemini.Params, locale) {
+				return
+			}
+		}
+		if req.Soniox != nil && req.Soniox.Params != nil {
+			if !validateAndSaveParamsBlob(w, ctx, h.systemConfigs.Set, "tts.soniox.params", "soniox", req.Soniox.Params, locale) {
 				return
 			}
 		}
@@ -384,6 +418,11 @@ func (h *TTSConfigHandler) handleSave(w http.ResponseWriter, r *http.Request) {
 		}
 		if req.Gemini != nil && req.Gemini.APIKey != "" && req.Gemini.APIKey != "***" {
 			if !set("tts.gemini.api_key", req.Gemini.APIKey, "gemini api_key") {
+				return
+			}
+		}
+		if req.Soniox != nil && req.Soniox.APIKey != "" && req.Soniox.APIKey != "***" {
+			if !set("tts.soniox.api_key", req.Soniox.APIKey, "soniox api_key") {
 				return
 			}
 		}
@@ -463,6 +502,16 @@ func NewTenantTTSResolver(sc store.SystemConfigStore, cs store.ConfigSecretsStor
 			req.APIBase, _ = sc.Get(ctx, "tts.gemini.api_base")
 			req.VoiceID, _ = sc.Get(ctx, "tts.gemini.voice")
 			req.ModelID, _ = sc.Get(ctx, "tts.gemini.model")
+
+		case "soniox":
+			if key, _ := cs.Get(ctx, "tts.soniox.api_key"); key != "" {
+				req.APIKey = key
+			} else {
+				return nil, "", "", fmt.Errorf("no api key")
+			}
+			req.APIBase, _ = sc.Get(ctx, "tts.soniox.api_base")
+			req.VoiceID, _ = sc.Get(ctx, "tts.soniox.voice")
+			req.ModelID, _ = sc.Get(ctx, "tts.soniox.model")
 
 		default:
 			return nil, "", "", fmt.Errorf("unsupported provider: %s", providerName)

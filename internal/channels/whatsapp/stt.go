@@ -53,7 +53,7 @@ func (c *Channel) transcribeVoice(ctx context.Context, filePath, mimeType, local
 	if c.audioMgr == nil {
 		return fallback
 	}
-	sttCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	sttCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	res, err := c.audioMgr.Transcribe(sttCtx, audio.STTInput{FilePath: filePath, MimeType: mimeType}, audio.STTOptions{})
 	if err != nil || res == nil {

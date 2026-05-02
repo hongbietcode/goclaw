@@ -18,7 +18,7 @@ interface Props {
   provider: string;
   draft: TtsConfig;
   onUpdate: (
-    providerKey: keyof Pick<TtsConfig, "openai" | "elevenlabs" | "edge" | "minimax" | "gemini">,
+    providerKey: keyof Pick<TtsConfig, "openai" | "elevenlabs" | "edge" | "minimax" | "gemini" | "soniox">,
     patch: Partial<TtsProviderConfig>,
   ) => void;
   testConnection: (params: TestConnectionParams) => Promise<TestConnectionResult>;
@@ -38,7 +38,7 @@ export function CredentialsSection({ provider, draft, onUpdate, testConnection, 
     setTesting(true);
     try {
       // Build params from draft credentials — test with unsaved config
-      const cfg = draft[provider as keyof Pick<typeof draft, "openai" | "elevenlabs" | "minimax" | "gemini">];
+      const cfg = draft[provider as keyof Pick<typeof draft, "openai" | "elevenlabs" | "minimax" | "gemini" | "soniox">];
       // Don't send masked API key — backend will reject it
       const apiKey = cfg?.api_key === "***" ? undefined : cfg?.api_key;
       const params: TestConnectionParams = {
@@ -146,6 +146,18 @@ export function CredentialsSection({ provider, draft, onUpdate, testConnection, 
                 value={draft.gemini.api_base ?? ""}
                 onChange={(e) => onUpdate("gemini", { api_base: e.target.value })}
                 placeholder="https://generativelanguage.googleapis.com" />
+            </div>
+          </>
+        )}
+
+        {provider === "soniox" && (
+          <>
+            <div className="grid gap-1.5">
+              <Label htmlFor="sx-key">{t("soniox.apiKey", "API Key")}</Label>
+              <Input id="sx-key" type="password" className="text-base md:text-sm"
+                value={draft.soniox?.api_key ?? ""}
+                onChange={(e) => onUpdate("soniox", { api_key: e.target.value })}
+                placeholder="soniox-..." />
             </div>
           </>
         )}

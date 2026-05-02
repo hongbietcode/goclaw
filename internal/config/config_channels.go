@@ -453,6 +453,15 @@ type TtsConfig struct {
 	Edge       TtsEdgeConfig       `json:"edge"`
 	MiniMax    TtsMiniMaxConfig    `json:"minimax"`
 	Gemini     TtsGeminiConfig     `json:"gemini"`
+	Soniox     TtsSonioxConfig     `json:"soniox"`
+}
+
+// TtsSonioxConfig configures the Soniox TTS and STT provider.
+type TtsSonioxConfig struct {
+	APIKey  string `json:"api_key,omitempty"`  // required; encrypted at rest
+	APIBase string `json:"api_base,omitempty"` // custom TTS endpoint (optional)
+	Voice   string `json:"voice,omitempty"`    // default "Adrian"
+	Model   string `json:"model,omitempty"`    // default "tts-rt-v1"
 }
 
 // TtsGeminiConfig configures the Google Gemini TTS provider.

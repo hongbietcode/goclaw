@@ -416,25 +416,29 @@ func (c *Channel) handleMessage(ctx context.Context, update telego.Update) {
 		for i := range mediaList {
 			m := &mediaList[i]
 			switch m.Type {
-			case "audio", "voice":
-				var transcript string
-				var sttErr error
-				if c.audioMgr != nil {
-					sttCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-					res, err := c.audioMgr.Transcribe(sttCtx, audio.STTInput{FilePath: m.FilePath, MimeType: "audio/ogg"}, audio.STTOptions{})
-					cancel()
-					if err == nil && res != nil {
-						transcript = res.Text
-					} else {
-						sttErr = err
-					}
-				}
-				if sttErr != nil {
-					slog.Warn("telegram: STT transcription failed",
-						"type", m.Type, "error", sttErr)
+		case "audio", "voice":
+			var transcript string
+			var sttErr error
+			if c.audioMgr != nil {
+				slog.Info("telegram: STT starting", "type", m.Type, "file", m.FilePath)
+				sttCtx, cancel := context.WithTimeout(ctx, 90*time.Second)
+				res, err := c.audioMgr.Transcribe(sttCtx, audio.STTInput{FilePath: m.FilePath, MimeType: "audio/ogg"}, audio.STTOptions{})
+				cancel()
+				if err == nil && res != nil {
+					transcript = res.Text
+					slog.Info("telegram: STT completed", "type", m.Type, "text_len", len(transcript), "provider", res.Provider)
 				} else {
-					m.Transcript = transcript
+					sttErr = err
 				}
+			} else {
+				slog.Warn("telegram: STT skipped (no audioMgr)", "type", m.Type)
+			}
+			if sttErr != nil {
+				slog.Warn("telegram: STT transcription failed",
+					"type", m.Type, "error", sttErr)
+			} else {
+				m.Transcript = transcript
+			}
 			case "document":
 				if m.FileName != "" && m.FilePath != "" {
 					docContent, err := extractDocumentContent(m.FilePath, m.FileName)

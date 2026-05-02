@@ -25,7 +25,8 @@
     "elevenlabs": "ElevenLabs",
     "edge": "Edge（免费）",
     "minimax": "MiniMax",
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "soniox": "Soniox"
   },
   "autoModes": {
     "off": "关闭",
@@ -208,6 +209,9 @@
       "insertHint": "点击标签插入到光标位置"
     },
     "previewBadge": "预览版"
+  },
+  "soniox": {
+    "apiKey": "API Key"
   },
   "voice_label": "声音",
   "voice_placeholder": "选择声音…",

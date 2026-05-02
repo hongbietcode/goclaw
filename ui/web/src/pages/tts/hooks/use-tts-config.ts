@@ -37,6 +37,7 @@ export interface TtsConfig {
   edge: TtsProviderConfig;
   minimax: TtsProviderConfig;
   gemini: TtsProviderConfig;
+  soniox: TtsProviderConfig;
 }
 
 const DEFAULT_TTS: TtsConfig = {
@@ -50,6 +51,7 @@ const DEFAULT_TTS: TtsConfig = {
   edge: {},
   minimax: {},
   gemini: {},
+  soniox: {},
 };
 
 export interface SynthesizeParams {
