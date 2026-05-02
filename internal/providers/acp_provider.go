@@ -28,7 +28,7 @@ type ACPProvider struct {
 	bridge       *acp.ToolBridge
 	defaultModel string
 	permMode     string
-	poolKey      string // key for the shared process in the pool (binary + args)
+	poolKey      string // base key for the per-session process in the pool (binary + args)
 
 	acpSessions sync.Map // goclawSessionKey → *acpSessionEntry
 	sessionMu   sync.Map // goclawSessionKey → *sync.Mutex (prevents concurrent session creation)
@@ -186,6 +186,13 @@ func (p *ACPProvider) Capabilities() ProviderCapabilities {
 	}
 }
 
+// sessionPoolKey returns a per-session pool key so each goclaw session gets
+// its own ACP subprocess. Prevents one slow/stuck session from blocking others
+// that share the same binary+args. Idle processes are reaped via idleTTL.
+func (p *ACPProvider) sessionPoolKey(sessionKey string) string {
+	return p.poolKey + "|sess=" + sessionKey
+}
+
 // Chat sends a prompt and returns the complete response (non-streaming).
 func (p *ACPProvider) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, error) {
 	sessionKey := extractStringOpt(req.Options, OptSessionKey)
@@ -193,7 +200,7 @@ func (p *ACPProvider) Chat(ctx context.Context, req ChatRequest) (*ChatResponse,
 		sessionKey = fmt.Sprintf("temp-%d", time.Now().UnixNano())
 	}
 
-	proc, err := p.pool.GetOrSpawn(ctx, p.poolKey)
+	proc, err := p.pool.GetOrSpawn(ctx, p.sessionPoolKey(sessionKey))
 	if err != nil {
 		return nil, fmt.Errorf("acp: spawn failed: %w", err)
 	}
@@ -249,7 +256,7 @@ func (p *ACPProvider) ChatStream(ctx context.Context, req ChatRequest, onChunk f
 		sessionKey = fmt.Sprintf("temp-%d", time.Now().UnixNano())
 	}
 
-	proc, err := p.pool.GetOrSpawn(ctx, p.poolKey)
+	proc, err := p.pool.GetOrSpawn(ctx, p.sessionPoolKey(sessionKey))
 	if err != nil {
 		return nil, fmt.Errorf("acp: spawn failed: %w", err)
 	}
@@ -276,7 +283,7 @@ func (p *ACPProvider) ChatStream(ctx context.Context, req ChatRequest, onChunk f
 	go func() {
 		select {
 		case <-ctx.Done():
-			if errors.Is(ctx.Err(), context.Canceled) {
+			if errors.Is(ctx.Err(), context.Canceled) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
 				_ = proc.Cancel(acpSessionID)
 			}
 		case <-done:
